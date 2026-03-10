@@ -4,43 +4,26 @@
  */
 
 /**
- * Filtra apenas os dias com faturamento válido (valor > 0).
- * @param {RegistroFaturamento[]} registros
- * @returns {number[]}
+ * Calcula as estatísticas de faturamento anual ignorando dias sem movimento.
+ * @param {RegistroFaturamento[]} dados
+ * @returns {EstatisticasFaturamento | null}
  */
-function extrairValoresValidos(registros) {
-  return registros
-    .map(({ valor }) => valor)
-    .filter((valor) => valor > 0);
-}
+export function calcularEstatisticas(dados) {
+  if (!entradaEhValida(dados)) return null;
 
-/**
- * Calcula mínimo, máximo e soma em uma única passagem pelo array.
- * @param {number[]} valores
- * @returns {{ menorValor: number, maiorValor: number, soma: number }}
- */
-function calcularAgregados(valores) {
-  let menorValor = valores[0];
-  let maiorValor = valores[0];
-  let soma = 0;
+  const valoresValidos = extrairValoresValidos(dados);
+  if (valoresValidos.length === 0) return null;
 
-  for (const valor of valores) {
-    if (valor < menorValor) menorValor = valor;
-    if (valor > maiorValor) maiorValor = valor;
-    soma += valor;
-  }
+  const { menorValor, maiorValor, soma } = calcularValores(valoresValidos);
+  const media = soma / valoresValidos.length;
+  const diasAcimaDaMedia = contarValoresAcima(valoresValidos, media);
 
-  return {  menorValor,  maiorValor, soma };
-}
-
-/**
- * Conta quantos valores estão acima de um determinado limite.
- * @param {number[]} valores
- * @param {number} limite
- * @returns {number}
- */
-function contarValoresAcimaDo(valores, limite) {
-  return valores.filter((valor) => valor > limite).length;
+  return {
+    menorValor,
+    maiorValor,
+    media,
+    diasAcimaDaMedia,
+  };
 }
 
 /**
@@ -53,24 +36,39 @@ function entradaEhValida(dados) {
 }
 
 /**
- * Calcula as estatísticas de faturamento anual ignorando dias sem movimento.
- * @param {RegistroFaturamento[]} dados
- * @returns {EstatisticasFaturamento | null}
+ * Filtra apenas os dias com faturamento válido (valor > 0).
+ * @param {RegistroFaturamento[]} registros
+ * @returns {number[]}
  */
-export function calcularEstatisticas(dados) {
-  if (!entradaEhValida(dados)) return null;
+function extrairValoresValidos(registros) {
+  return registros.map(({ valor }) => valor).filter((valor) => valor > 0);
+}
 
-  const valoresValidos = extrairValoresValidos(dados);
-  if (valoresValidos.length === 0) return null;
+/**
+ * Calcula mínimo, máximo e soma em uma única passagem pelo array.
+ * @param {number[]} valores
+ * @returns {{ menorValor: number, maiorValor: number, soma: number }}
+ */
+function calcularValores(valores) {
+  let menorValor = valores[0];
+  let maiorValor = valores[0];
+  let soma = 0;
 
-  const { menorValor, maiorValor, soma } = calcularAgregados(valoresValidos);
-  const media = soma / valoresValidos.length;
-  const diasAcimaDaMedia = contarValoresAcimaDo(valoresValidos, media);
+  for (const valor of valores) {
+    if (valor < menorValor) menorValor = valor;
+    if (valor > maiorValor) maiorValor = valor;
+    soma += valor;
+  }
 
-  return {
-    menorValor,
-    maiorValor,
-    media,
-    diasAcimaDaMedia,
-  };
+  return { menorValor, maiorValor, soma };
+}
+
+/**
+ * Conta quantos valores estão acima de um determinado limite.
+ * @param {number[]} valores
+ * @param {number} limite
+ * @returns {number}
+ */
+function contarValoresAcima(valores, limite) {
+  return valores.filter((valor) => valor > limite).length;
 }
