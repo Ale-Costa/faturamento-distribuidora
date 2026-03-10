@@ -15,31 +15,22 @@ function extrairValoresValidos(registros) {
 }
 
 /**
- * Retorna o menor valor de um array de números.
+ * Calcula mínimo, máximo e soma em uma única passagem pelo array.
  * @param {number[]} valores
- * @returns {number}
+ * @returns {{ menorValor: number, maiorValor: number, soma: number }}
  */
-function calcularMinimo(valores) {
-  return Math.min(...valores);
-}
+function calcularAgregados(valores) {
+  let menorValor = valores[0];
+  let maiorValor = valores[0];
+  let soma = 0;
 
-/**
- * Retorna o maior valor de um array de números.
- * @param {number[]} valores
- * @returns {number}
- */
-function calcularMaximo(valores) {
-  return Math.max(...valores);
-}
+  for (const valor of valores) {
+    if (valor < menorValor) menorValor = valor;
+    if (valor > maiorValor) maiorValor = valor;
+    soma += valor;
+  }
 
-/**
- * Calcula a média aritmética de um array de números.
- * @param {number[]} valores
- * @returns {number}
- */
-function calcularMedia(valores) {
-  const soma = valores.reduce((acumulado, valor) => acumulado + valor, 0);
-  return soma / valores.length;
+  return {  menorValor,  maiorValor, soma };
 }
 
 /**
@@ -70,12 +61,10 @@ export function calcularEstatisticas(dados) {
   if (!entradaEhValida(dados)) return null;
 
   const valoresValidos = extrairValoresValidos(dados);
-
   if (valoresValidos.length === 0) return null;
 
-  const menorValor = calcularMinimo(valoresValidos);
-  const maiorValor = calcularMaximo(valoresValidos);
-  const media = calcularMedia(valoresValidos);
+  const { menorValor, maiorValor, soma } = calcularAgregados(valoresValidos);
+  const media = soma / valoresValidos.length;
   const diasAcimaDaMedia = contarValoresAcimaDo(valoresValidos, media);
 
   return {

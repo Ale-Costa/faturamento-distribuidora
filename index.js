@@ -50,7 +50,6 @@ async function main() {
     exibirResultados(resultados);
   } catch (error) {
     console.error('Erro ao processar dados:', error.message);
-    process.exit(1);
   }
 }
 
